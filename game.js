@@ -1,11 +1,17 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+let characterImage = new Image();
+characterImage.src = 'assets/sprites/cat.png'; // Replace with the path to your character image
+
+let bossImage = new Image();
+bossImage.src = 'assets/sprites/boss.png'; // Replace with the path to your boss image
+
 let character = {
     x: 50,
     y: 550,
-    width: 30,
-    height: 30,
+    width: 60,
+    height: 60,
     color: 'orange',
     speed: 2,
     jumpPower: -5,
@@ -16,8 +22,8 @@ let character = {
 let boss = {
     x: 700,
     y: 550,
-    width: 50,
-    height: 50,
+    width: 90,
+    height: 90,
     color: 'red',
     jumpPower: -8,
     isJumping: false,
@@ -181,8 +187,7 @@ function drawGameOver() {
 }
 
 function drawCharacter() {
-    ctx.fillStyle = character.color;
-    ctx.fillRect(character.x, character.y, character.width, character.height);
+    ctx.drawImage(characterImage, character.x, character.y, character.width, character.height);
 }
 
 function drawPlatforms() {
@@ -227,10 +232,8 @@ function updateBoss() {
 }
 
 function drawBoss() {
-    ctx.fillStyle = boss.color;
-    ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
+    ctx.drawImage(bossImage, boss.x, boss.y, boss.width, boss.height);
 }
-
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
