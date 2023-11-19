@@ -7,6 +7,9 @@ characterImage.src = 'assets/sprites/cat.png'; // Replace with the path to your 
 let bossImage = new Image();
 bossImage.src = 'assets/sprites/boss.png'; // Replace with the path to your boss image
 
+let backgroundImage = new Image();
+backgroundImage.src = 'assets/sprites/background.png'; // Replace with the actual path to your background image
+
 let character = {
     x: 50,
     y: 550,
@@ -20,7 +23,7 @@ let character = {
 };
 
 let boss = {
-    x: 700,
+    x: 650,
     y: 550,
     width: 90,
     height: 90,
@@ -191,7 +194,7 @@ function drawCharacter() {
 }
 
 function drawPlatforms() {
-    ctx.fillStyle = 'green';
+    ctx.fillStyle = '#654321';
     for (let platform of platforms) {
         ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
     }
@@ -208,6 +211,11 @@ function drawGameWon() {
     ctx.fillText("You Win!", canvas.width / 2 - 120, canvas.height / 2);
 }
 
+function drawBackground() {
+    // Cover the entire canvas
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+}
+
 
 function updateBoss() {
     // Boss jumping mechanics
@@ -221,12 +229,12 @@ function updateBoss() {
 
     // Apply gravity to the boss
     boss.y += boss.velocityY;
-    boss.velocityY += 0.2; // gravity
+    boss.velocityY += 0.15; // gravity
 
     // Landing
-    if (boss.y >= 550) {
+    if (boss.y >= 520) {
         boss.isJumping = false;
-        boss.y = 550;
+        boss.y = 520;
         boss.velocityY = 0;
     }
 }
@@ -237,6 +245,7 @@ function drawBoss() {
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground(); // Draw the background first
 
     if (!gameOver && !gameWon) {
         drawPlatforms();
