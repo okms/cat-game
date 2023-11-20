@@ -13,6 +13,9 @@ backgroundImage.src = 'assets/sprites/background.png'; // Replace with the actua
 let doorImage = new Image();
 doorImage.src = 'assets/sprites/door.png'; // Replace with the path to your door image
 
+let platformImage = new Image();
+platformImage.src = 'assets/sprites/platform.png'; // Replace with the path to your platform image
+
 let character = {
     x: 50,
     y: 550,
@@ -37,9 +40,9 @@ let boss = {
 };
 
 let door = {
-    x: 750,
+    x: 710,
     y: 500,
-    width: 50,
+    width: 100,
     height: 100,
     color: 'blue'
 };
@@ -213,9 +216,8 @@ function drawCharacter() {
 }
 
 function drawPlatforms() {
-    ctx.fillStyle = '#654321    ';
     for (let platform of platforms) {
-        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+        ctx.drawImage(platformImage, platform.x, platform.y, platform.width, platform.height);
     }
 }
 
@@ -290,7 +292,7 @@ document.addEventListener('keydown', function(event) {
         character.x = 50; // Reset character position
         character.y = 550;
         generatePlatforms(); // Regenerate platforms
-        boss.x = 700; // Reset boss position
+        // Reset boss position
         boss.y = 550;
     }
 });
