@@ -10,6 +10,9 @@ bossImage.src = 'assets/sprites/boss.png'; // Replace with the path to your boss
 let backgroundImage = new Image();
 backgroundImage.src = 'assets/sprites/background.png'; // Replace with the actual path to your background image
 
+let doorImage = new Image();
+doorImage.src = 'assets/sprites/door.png'; // Replace with the path to your door image
+
 let character = {
     x: 50,
     y: 550,
@@ -142,9 +145,11 @@ function updateCharacter() {
     // Character movement
     if (keys.right) {
         character.x += character.speed;
+        facingLeft = false; // Character is facing right
     }
     if (keys.left) {
         character.x -= character.speed;
+        facingLeft = true; // Character is facing left
     }
 
     // Implement jumping
@@ -189,20 +194,33 @@ function drawGameOver() {
     ctx.fillText("Game Over", canvas.width / 2 - 140, canvas.height / 2);
 }
 
+let facingLeft = false; // A new variable to keep track of the character's facing direction
+
 function drawCharacter() {
-    ctx.drawImage(characterImage, character.x, character.y, character.width, character.height);
+    ctx.save(); // Save the current context state
+
+    if (facingLeft) {
+        // Flip the image horizontally if facing left
+        ctx.scale(-1, 1);
+        ctx.translate(-character.width, 0);
+        ctx.drawImage(characterImage, -character.x, character.y, character.width, character.height);
+    } else {
+        // Draw the image normally if facing right
+        ctx.drawImage(characterImage, character.x, character.y, character.width, character.height);
+    }
+
+    ctx.restore(); // Restore the original context state
 }
 
 function drawPlatforms() {
-    ctx.fillStyle = '#654321';
+    ctx.fillStyle = '#654321    ';
     for (let platform of platforms) {
         ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
     }
 }
 
 function drawDoor() {
-    ctx.fillStyle = door.color;
-    ctx.fillRect(door.x, door.y, door.width, door.height);
+    ctx.drawImage(doorImage, door.x, door.y, door.width, door.height);
 }
 
 function drawGameWon() {
