@@ -1,6 +1,13 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+const LEVEL_WIDTH = 2400;
+
+let camera = {
+    x: 0,
+    width: canvas.width
+};
+
 let characterImage = new Image();
 characterImage.src = 'assets/sprites/cat.png'; // Replace with the path to your character image
 
@@ -29,19 +36,19 @@ let character = {
 };
 
 let boss = {
-    x: 650,
-    y: 550,
     width: 90,
     height: 90,
     color: 'red',
     jumpPower: -8,
     isJumping: false,
-    velocityY: 0
+    velocityY: 0,
+    x: LEVEL_WIDTH - 200,
+    y: canvas.height - 90,
 };
 
 let door = {
-    x: 710,
-    y: 500,
+    x: LEVEL_WIDTH-100,
+    y: canvas.height - 100 - 20,
     width: 100,
     height: 100,
     color: 'blue'
@@ -174,9 +181,9 @@ function updateCharacter() {
     }
 
     // Falling off the platforms
-    if (character.y >= 550 && !platform) {
+    if (character.y >= canvas.height - character.height && !platform) {
         character.isJumping = false;
-        character.y = 550;
+        character.y = canvas.height - character.height;
         character.velocityY = 0;
     }
 
@@ -188,6 +195,20 @@ function updateCharacter() {
     // Check for reaching the door
     if (checkDoorCollision()) {
         gameWon = true;
+    }
+}
+
+function updateCamera() {
+    // Calculate the right edge of the camera view
+    let cameraRightEdge = camera.x + camera.width;
+
+    // If the character approaches the right edge of the camera view, move the camera
+    if (character.x > cameraRightEdge - 200) { // 200 is the offset from the right edge
+        camera.x = Math.min(character.x - (camera.width - 200), LEVEL_WIDTH - camera.width);
+    }
+    // If the character moves left, adjust the camera to follow but not beyond the level start
+    else if (character.x < camera.x + 200) { // 200 is the offset from the left edge
+        camera.x = Math.max(character.x - 200, 0);
     }
 }
 
@@ -216,13 +237,19 @@ function drawCharacter() {
 }
 
 function drawPlatforms() {
-    for (let platform of platforms) {
-        ctx.drawImage(platformImage, platform.x, platform.y, platform.width, platform.height);
-    }
+    // Draw each platform relative to the camera position
+    platforms.forEach(platform => {
+        if (platform.x + platform.width > camera.x && platform.x < camera.x + canvas.width) {
+            // Only draw platforms that are within the camera view
+            ctx.drawImage(platformImage, platform.x - camera.x, platform.y, platform.width, platform.height);
+        }
+    });
 }
 
+
+// Draw Door Function - considering camera
 function drawDoor() {
-    ctx.drawImage(doorImage, door.x, door.y, door.width, door.height);
+    ctx.drawImage(doorImage, door.x - camera.x, door.y, door.width, door.height);
 }
 
 function drawGameWon() {
@@ -232,8 +259,17 @@ function drawGameWon() {
 }
 
 function drawBackground() {
-    // Cover the entire canvas
-    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+    // The x position to start drawing the background from
+    // Ensuring it's always a multiple of the background image width
+    let startX = Math.floor(camera.x / backgroundImage.width) * backgroundImage.width;
+
+    // The x position to stop drawing the background
+    let endX = startX + canvas.width + backgroundImage.width; // One extra width to cover scrolling
+
+    for (let x = startX; x < endX; x += backgroundImage.width) {
+        // Draw each segment of the background
+        ctx.drawImage(backgroundImage, x - camera.x, 0, backgroundImage.width, canvas.height);
+    }
 }
 
 
@@ -259,14 +295,28 @@ function updateBoss() {
     }
 }
 
+// Update the drawBoss function to consider camera position
 function drawBoss() {
-    ctx.drawImage(bossImage, boss.x, boss.y, boss.width, boss.height);
+    ctx.save(); // Save the current context state
+
+    // Flip the image horizontally if facing left
+    if (facingLeft) {
+        ctx.scale(-1, 1);
+        ctx.translate(-boss.x - boss.width - 2 * (boss.x - camera.x), 0);
+        ctx.drawImage(bossImage, -boss.x + camera.x, boss.y, boss.width, boss.height);
+    } else {
+        // Draw the image normally if facing right
+        ctx.drawImage(bossImage, boss.x - camera.x, boss.y, boss.width, boss.height);
+    }
+
+    ctx.restore(); // Restore the original context state
 }
 
 function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBackground(); // Draw the background first
+    updateCamera(); // Update the camera each frame based on character position
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground(); // Draw the background with camera adjustment
     if (!gameOver && !gameWon) {
         drawPlatforms();
         updateCharacter();
